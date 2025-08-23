@@ -1,0 +1,124 @@
+<h1><%= @status.humanize %> Jobs</h1>
+
+<!-- Job Class, Queue, Arguments, Status filters -->
+<div class="row mb-4">
+  <div class="col-12">
+    <%= form_with url: request.path, method: :get, local: true, class: "row g-3" do |form| %>
+      <div class="col-md-3">
+        <%= form.label :job_class, "Job Class:", class: "form-label" %>
+        <%= form.text_field :job_class, placeholder: "Filter by class name", class: "form-control", value: params[:job_class] %>
+      </div>
+      
+      <div class="col-md-3">
+        <%= form.label :queue, "Queue:", class: "form-label" %>
+        <%= form.text_field :queue, placeholder: "Filter by queue", class: "form-control", value: params[:queue] %>
+      </div>
+      
+      <div class="col-md-3">
+        <%= form.label :arguments, "Arguments:", class: "form-label" %>
+        <%= form.text_field :arguments, placeholder: "Filter by arguments", class: "form-control", value: params[:arguments] %>
+      </div>
+      
+      <div class="col-md-3">
+        <%= form.label :status_filter, "Status:", class: "form-label" %>
+        <%= form.select :status_filter, 
+            options_for_select([
+              ['All Statuses', ''],
+              ['Ready', 'ready'],
+              ['In Progress', 'in_progress'],
+              ['Scheduled', 'scheduled'],
+              ['Recurring', 'recurring'],
+              ['Failed', 'failed'],
+              ['Completed', 'completed']
+            ], params[:status_filter]), 
+            {}, { class: "form-select" } %>
+      </div>
+      
+      <div class="col-12">
+        <%= form.submit "Apply Filters", class: "btn btn-primary" %>
+        <%= link_to "Reset", request.path, class: "btn btn-outline-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>JOB</th>
+        <th>QUEUE</th>
+        <th>ARGUMENTS</th>
+        <th>STATUS</th>
+        <th>CREATED AT</th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @jobs.each do |job| %>
+        <% actual_job = job.respond_to?(:job) ? job.job : job %>
+        <tr>
+          <td><%= actual_job.id %></td>
+          <td><%= actual_job.class_name %></td>
+          <td><%= actual_job.queue_name %></td>
+          <td class="arguments-cell">
+            <span title="<%= format_job_arguments(actual_job.arguments) %>">
+              <%= truncate_arguments(actual_job.arguments) %>
+            </span>
+          </td>
+          <td>
+            <span class="badge <%= status_badge_class(@status) %>">
+              <%= @status.humanize %>
+            </span>
+          </td>
+          <td><%= actual_job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+          <td>
+            <% if @status == 'failed' %>
+              <button class="btn btn-sm btn-warning" onclick="retryJob(<%= actual_job.id %>)">Retry</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteJob(<%= actual_job.id %>)">Delete</button>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function retryJob(jobId) {
+  if (confirm('Are you sure you want to retry this job?')) {
+    fetch(`/solid_queue/api/jobs/${jobId}/retry`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Failed to retry job');
+      }
+    });
+  }
+}
+
+function deleteJob(jobId) {
+  if (confirm('Are you sure you want to delete this job?')) {
+    fetch(`/solid_queue/api/jobs/${jobId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Failed to delete job');
+      }
+    });
+  }
+}
+</script>

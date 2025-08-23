@@ -1,0 +1,115 @@
+<h1>Overview</h1>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <h3>Queue Statistics</h3>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-primary text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:total] %></h2>
+        <p class="card-text">TOTAL JOBS</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-info text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:ready] %></h2>
+        <p class="card-text">READY</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-warning text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:in_progress] %></h2>
+        <p class="card-text">IN PROGRESS</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-secondary text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:scheduled] %></h2>
+        <p class="card-text">SCHEDULED</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-dark text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:recurring] %></h2>
+        <p class="card-text">RECURRING</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-danger text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:failed] %></h2>
+        <p class="card-text">FAILED</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+    <div class="card stats-card bg-success text-white">
+      <div class="card-body text-center">
+        <h2 class="card-title"><%= @statistics[:completed] %></h2>
+        <p class="card-text">COMPLETED</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <h3>Recent Jobs</h3>
+    
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>JOB</th>
+            <th>QUEUE</th>
+            <th>ARGUMENTS</th>
+            <th>STATUS</th>
+            <th>CREATED AT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recent_jobs.each do |job| %>
+            <tr>
+              <td><%= job.id %></td>
+              <td><%= job.class_name %></td>
+              <td><%= job.queue_name %></td>
+              <td class="arguments-cell"><%= truncate_arguments(job.arguments) %></td>
+              <td>
+                <span class="badge <%= status_badge_class(job_status(job)) %>">
+                  <%= job_status(job) %>
+                </span>
+              </td>
+              <td><%= job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+              <td>
+                <!-- Actions will be added later -->
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

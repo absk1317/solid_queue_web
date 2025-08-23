@@ -1,0 +1,87 @@
+<h1>Queues</h1>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Queue Name</th>
+        <th>Ready</th>
+        <th>In Progress</th>
+        <th>Scheduled</th>
+        <th>Failed</th>
+        <th>Completed</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% queue_totals = Hash.new(0) %>
+      <% @queues.group_by { |(queue_name, status), count| queue_name }.each do |queue_name, queue_data| %>
+        <% queue_stats = Hash.new(0) %>
+        <% queue_data.each { |(name, status), count| queue_stats[status] = count } %>
+        <% total = queue_stats.values.sum %>
+        <% queue_totals[:ready] += queue_stats['ready'] %>
+        <% queue_totals[:in_progress] += queue_stats['in_progress'] %>
+        <% queue_totals[:scheduled] += queue_stats['scheduled'] %>
+        <% queue_totals[:failed] += queue_stats['failed'] %>
+        <% queue_totals[:completed] += queue_stats['completed'] %>
+        <% queue_totals[:total] += total %>
+        
+        <tr>
+          <td><strong><%= queue_name %></strong></td>
+          <td>
+            <% if queue_stats['ready'] > 0 %>
+              <%= link_to queue_stats['ready'], jobs_by_status_path('ready', queue: queue_name), 
+                          class: "badge bg-info text-decoration-none" %>
+            <% else %>
+              <span class="text-muted">0</span>
+            <% end %>
+          </td>
+          <td>
+            <% if queue_stats['in_progress'] > 0 %>
+              <%= link_to queue_stats['in_progress'], jobs_by_status_path('in_progress', queue: queue_name), 
+                          class: "badge bg-warning text-decoration-none" %>
+            <% else %>
+              <span class="text-muted">0</span>
+            <% end %>
+          </td>
+          <td>
+            <% if queue_stats['scheduled'] > 0 %>
+              <%= link_to queue_stats['scheduled'], jobs_by_status_path('scheduled', queue: queue_name), 
+                          class: "badge bg-secondary text-decoration-none" %>
+            <% else %>
+              <span class="text-muted">0</span>
+            <% end %>
+          </td>
+          <td>
+            <% if queue_stats['failed'] > 0 %>
+              <%= link_to queue_stats['failed'], jobs_by_status_path('failed', queue: queue_name), 
+                          class: "badge bg-danger text-decoration-none" %>
+            <% else %>
+              <span class="text-muted">0</span>
+            <% end %>
+          </td>
+          <td>
+            <% if queue_stats['completed'] > 0 %>
+              <%= link_to queue_stats['completed'], jobs_by_status_path('completed', queue: queue_name), 
+                          class: "badge bg-success text-decoration-none" %>
+            <% else %>
+              <span class="text-muted">0</span>
+            <% end %>
+          </td>
+          <td><strong><%= total %></strong></td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr class="table-dark">
+        <th>Total</th>
+        <th><%= queue_totals[:ready] %></th>
+        <th><%= queue_totals[:in_progress] %></th>
+        <th><%= queue_totals[:scheduled] %></th>
+        <th><%= queue_totals[:failed] %></th>
+        <th><%= queue_totals[:completed] %></th>
+        <th><%= queue_totals[:total] %></th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
