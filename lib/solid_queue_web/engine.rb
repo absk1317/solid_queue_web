@@ -11,7 +11,9 @@ module SolidQueueWeb
     end
 
     initializer "solid_queue_web.assets" do |app|
-      app.config.assets.paths << root.join("app/assets/stylesheets")
+      if app.config.respond_to?(:assets)
+        app.config.assets.paths << root.join("app/assets/stylesheets")
+      end
     end
   end
 end
